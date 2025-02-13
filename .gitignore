@@ -1,0 +1,34 @@
+# Node modules
+node_modules/
+npm-debug.log*
+
+# macOS system files
+.DS_Store
+
+# Backup files created by editors
+*.~ 
+*.swp 
+*.swo 
+
+# Build output or packaged extension files
+dist/
+build/
+*.crx
+*.zip
+
+# Editor settings
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Logs and cache
+*.log
+.cache/
+coverage/
+
+# Environment files
+.env
+.env.*.local
