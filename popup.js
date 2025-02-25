@@ -23,23 +23,56 @@
 // 	document.getElementById('saved-time').textContent = 'No saved videos.';
 // }
 
-chrome.storage.local.get('youtubeData', (data) => {
-	const savedVideos = data.youtubeData;
+const container = document.getElementById('video-list');
+const clearAllButton = document.getElementById('clear-all');
 
-	if (savedVideos && Object.keys(savedVideos).length > 0) {
-		const container = document.getElementById('video-link');
-		container.innerHTML = '';
+function loadSavedVideos() {
+	chrome.storage.local.get('youtubeData', (data) => {
+		const savedVideos = data.youtubeData;
 
-		for (const [url, videoData] of Object.entries(savedVideos)) {
-			const videoElement = document.createElement('div');
-			videoElement.innerHTML = `
-        <p>You stopped at: ${videoData.time.toFixed(2)} seconds</p>
-        <a href="${url}" target="_blank">${videoData.title}</a>
-        <hr>
-      `;
-			container.appendChild(videoElement);
+		if (savedVideos && Object.keys(savedVideos).length > 0) {
+			container.innerHTML = '';
+			clearAllButton.style.display = 'block'; // show button
+			for (const [url, videoData] of Object.entries(savedVideos)) {
+				const videoElement = document.createElement('div');
+				videoElement.innerHTML = `
+            <p>You stopped at: ${videoData.time.toFixed(2)} seconds</p>
+            <a href="${url}" target="_blank">${videoData.title}</a>
+            <button class="remove-btn" data-url="${url}">Remove</button>
+            <hr>
+          `;
+				container.appendChild(videoElement);
+			}
+			// Add event listeners to remove buttons
+			document.querySelectorAll('.remove-btn').forEach((button) => {
+				button.addEventListener('click', (e) => {
+					const videoURL = e.target.getAttribute('data-url');
+					removeVideo(videoURL);
+				});
+			});
+		} else {
+			container.innerHTML = '<p>No saved videos.</p>';
+			clearAllButton.style.display = 'none'; // hide button if no videos are found.
 		}
-	} else {
-		document.getElementById('saved-time').textContent = 'No saved videos.';
-	}
-});
+	});
+}
+function removeVideo(videoURL) {
+	chrome.storage.local.get('youtubeData', (data) => {
+		let savedVideos = data.youtubeData || {};
+		delete savedVideos[videoURL]; // Remove the selected video
+		chrome.storage.local.set({ youtubeData: savedVideos }, () => {
+			loadSavedVideos(); // Refresh UI
+		});
+	});
+}
+
+function clearAllVideos() {
+	chrome.storage.local.remove('youtubeData', () => {
+		console.log('All videos cleared.');
+		loadSavedVideos(); // Refresh UI
+	});
+}
+
+clearAllButton.style.display = 'none'; // initially hide the button
+loadSavedVideos();
+clearAllButton.addEventListener('click', clearAllVideos);
