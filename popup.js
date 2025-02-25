@@ -35,10 +35,11 @@ function loadSavedVideos() {
 			clearAllButton.style.display = 'block'; // show button
 			for (const [url, videoData] of Object.entries(savedVideos)) {
 				const videoElement = document.createElement('div');
+				videoElement.classList.add('video-item');
 				videoElement.innerHTML = `
-            <p>You stopped at: ${videoData.time.toFixed(2)} seconds</p>
+            <p>${videoData.time.toFixed(2)} seconds</p>
             <a href="${url}" target="_blank">${videoData.title}</a>
-            <button class="remove-btn" data-url="${url}">Remove</button>
+            <button class="remove-btn" data-url="${url}">Remove Video</button>
             <hr>
           `;
 				container.appendChild(videoElement);
