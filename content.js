@@ -1,4 +1,11 @@
+let isScriptInitialized = false;
 function initContentScript() {
+	if (isScriptInitialized) {
+		console.log('Content script already initialized. Skipping...');
+		return;
+	}
+	isScriptInitialized = true;
+
 	// check if the page is a youtube page
 	if (!window.location.pathname.startsWith('/watch')) {
 		console.log('Not a YouTube video page. Skipping...');
@@ -7,6 +14,7 @@ function initContentScript() {
 
 	// looks for video element on the page.
 	const video = document.querySelector('video');
+	let interval;
 
 	if (video) {
 		console.log('video:', video);
@@ -40,15 +48,29 @@ function initContentScript() {
 			}
 		}
 
-		// call saveVideoData every 2 seconds to regularly save progress
-		const interval = setInterval(saveVideoData, 2000);
-		// 'beforeunload' is triggered when user closes or refreshes the tab
-		// calls saveVideoData when user 'unloads'
+		function startSaving() {
+			if (!interval) {
+				console.log('Starting save interval...');
+				interval = setInterval(saveVideoData, 2000);
+			}
+		}
 
-		// ensures one final save before tab closes // if unload is reliable
-		window.addEventListener('unload', saveVideoData);
-		// clears the interval when the tab is closed // cleaning up
-		window.addEventListener('unload', () => clearInterval(interval));
+		function stopSaving() {
+			clearInterval(interval);
+			interval = null;
+		}
+
+		document.addEventListener('visibilitychange', () => {
+			if (document.visibilityState === 'hidden') {
+				saveVideoData(); // Save progress before the tab is hidden
+				stopSaving(); // Stop interval to prevent unnecessary execution
+			} else {
+				startSaving(); // Resume saving when the tab is visible again
+			}
+		});
+
+		// call saveVideoData every 2 seconds to regularly save progress
+		startSaving();
 	} else {
 		console.log('No video element found on this page.');
 	}
@@ -91,8 +113,12 @@ const urlObserver = new MutationObserver(() => {
 		lastUrl = currentUrl;
 		console.log('URL changed, reinitializing content script...');
 		observer.disconnect(); // Clear old observer ^
+		isScriptInitialized = false;
 		if (window.location.pathname.startsWith('/watch')) {
-			// reinitailize observer if new page is a video page
+			// directly reinitialize content script
+			initContentScript();
+
+			// restart observer to catch any late-loaded video elements
 			observer.observe(document.body, { childList: true, subtree: true });
 		}
 	}
