@@ -30,6 +30,12 @@ h3 {
     gap: 5px;
 }
 
+.video-time {
+    white-space: nowrap;
+    margin-right: 5px;
+    font-weight: 600;
+}
+
 button {
     cursor: pointer;
     background-color: rgba(231, 49, 49, 0.982);

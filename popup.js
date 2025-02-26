@@ -34,10 +34,13 @@ function loadSavedVideos() {
 			container.innerHTML = '';
 			clearAllButton.style.display = 'block'; // show button
 			for (const [url, videoData] of Object.entries(savedVideos)) {
+				const minutes = Math.floor(videoData.time / 60);
+				const seconds = Math.floor(videoData.time % 60);
+
 				const videoElement = document.createElement('div');
 				videoElement.classList.add('video-item');
 				videoElement.innerHTML = `
-            <p>${videoData.time.toFixed(2)} seconds</p>
+            <p class="video-time">${minutes}m ${seconds}s</p>
             <a href="${url}" target="_blank">${videoData.title}</a>
             <button class="remove-btn" data-url="${url}">Remove Video</button>
             <hr>
