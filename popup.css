@@ -41,7 +41,8 @@ button {
     background-color: rgba(231, 49, 49, 0.982);
     color: white;
     border: none;
-    padding: 5px;
     border-radius: 5px;
+    width: 68px;
+    height: 40px
 }
 
