@@ -24,8 +24,13 @@ function initContentScript() {
 			// ensures chrome extension is still running, if chrome.runtime.id is missing,
 			// it means the extension was disabled or removed
 			if (chrome.runtime && chrome.runtime.id) {
+				// get video ID from URL to ensure clean and consistent URL format
+				// avoids duplicate saving of the same video with different URL formats
+				const url = new URL(window.location.href);
+				const videoID = url.searchParams.get('v');
+				if (!videoID) return; // ensure video exists
 				// get URL and title
-				const videoURL = window.location.href;
+				const videoURL = `https://www.youtube.com/watch?v=${videoID}`; // cleaned URL
 				const videoTitle = document.title;
 
 				// retrieve existing youtubeData from chrome.storage.local
