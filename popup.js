@@ -1,38 +1,14 @@
-// const data = await chrome.storage.local.get('youtubeData');
-// const savedVideos = data.youtubeData;
-// console.log(data);
-// console.log(savedVideos);
-// if (savedVideos && Object.keys(savedVideos).length > 0) {
-// 	const container = document.getElementById('video-link'); // popup.html
-// 	container.innerHTML = ''; // clear container - starts empty every time
-
-// 	// go through savedVideos object and create a div element for each video
-// 	for (const [url, videoData] of Object.entries(savedVideos)) {
-// 		const videoElement = document.createElement('div');
-// 		videoElement.innerHTML = `
-//         <p>You stopped at: ${videoData.time.toFixed(2)} seconds</p>
-//         <a href="${url}" target="_blank">${videoData.title}</a>
-//         <hr>
-//       `;
-// 		// append the div element to the container
-// 		container.appendChild(videoElement);
-// 	}
-// } else {
-// 	// no saved videos
-// 	// popup.html
-// 	document.getElementById('saved-time').textContent = 'No saved videos.';
-// }
-
 const container = document.getElementById('video-list');
 const clearAllButton = document.getElementById('clear-all');
 
-function loadSavedVideos() {
-	chrome.storage.local.get('youtubeData', (data) => {
+async function loadSavedVideos() {
+	try {
+		const data = await chrome.storage.local.get('youtubeData');
 		const savedVideos = data.youtubeData;
-
 		if (savedVideos && Object.keys(savedVideos).length > 0) {
 			container.innerHTML = '';
 			clearAllButton.style.display = 'block'; // show button
+
 			for (const [url, videoData] of Object.entries(savedVideos)) {
 				const minutes = Math.floor(videoData.time / 60);
 				const seconds = Math.floor(videoData.time % 60);
@@ -47,6 +23,7 @@ function loadSavedVideos() {
           `;
 				container.appendChild(videoElement);
 			}
+
 			// Add event listeners to remove buttons
 			document.querySelectorAll('.remove-btn').forEach((button) => {
 				button.addEventListener('click', (e) => {
@@ -58,23 +35,32 @@ function loadSavedVideos() {
 			container.innerHTML = '<p>No saved videos.</p>';
 			clearAllButton.style.display = 'none'; // hide button if no videos are found.
 		}
-	});
-}
-function removeVideo(videoURL) {
-	chrome.storage.local.get('youtubeData', (data) => {
-		let savedVideos = data.youtubeData || {};
-		delete savedVideos[videoURL]; // Remove the selected video
-		chrome.storage.local.set({ youtubeData: savedVideos }, () => {
-			loadSavedVideos(); // Refresh UI
-		});
-	});
+	} catch (error) {
+		console.error('Error loading saved videos:', error);
+	}
 }
 
-function clearAllVideos() {
-	chrome.storage.local.remove('youtubeData', () => {
-		console.log('All videos cleared.');
+async function removeVideo(videoURL) {
+	try {
+		const data = await chrome.storage.local.get('youtubeData');
+		let savedVideos = data.youtubeData ?? {};
+		if (videoURL in savedVideos) {
+			delete savedVideos[videoURL]; // Remove the selected video
+			await chrome.storage.local.set({ youtubeData: savedVideos });
+		}
 		loadSavedVideos(); // Refresh UI
-	});
+	} catch (error) {
+		console.error('Error removing video:', error);
+	}
+}
+
+async function clearAllVideos() {
+	try {
+		await chrome.storage.local.remove('youtubeData');
+		loadSavedVideos(); // Refresh UI
+	} catch (error) {
+		console.error('Error clearing all videos:', error);
+	}
 }
 
 clearAllButton.style.display = 'none'; // initially hide the button
