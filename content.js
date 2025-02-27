@@ -1,7 +1,7 @@
 let isScriptInitialized = false;
 console.log('content.js loaded');
 
-function initContentScript() {
+async function initContentScript() {
 	console.log('Initializing content script...');
 	if (isScriptInitialized) {
 		console.log('Content script already initialized. Skipping...');
@@ -15,7 +15,7 @@ function initContentScript() {
 		return;
 	}
 
-	// looks for video element on the page.
+	// look for video element on the page.
 	const video = document.querySelector('video');
 	let interval;
 
@@ -23,31 +23,24 @@ function initContentScript() {
 		console.log('video:', video);
 		console.log('currenttime:', video.currentTime);
 
-		// Listen for when the video ends
-		// video.addEventListener('ended', () => {
-		// 	console.log('Video ended, removing from storage...');
-		// 	removeVideoFromStorage();
-		// });
+		async function saveVideoData() {
+			try {
+				// ensure chrome extension is still running
+				if (chrome.runtime && chrome.runtime.id) {
+					// get video ID from URL to ensure clean and consistent URL format
+					// avoids duplicate saving of the same video with different URL formats
+					const url = new URL(window.location.href);
+					const videoID = url.searchParams.get('v');
 
-		function saveVideoData() {
-			// ensures chrome extension is still running, if chrome.runtime.id is missing,
-			// it means the extension was disabled or removed
-			if (chrome.runtime && chrome.runtime.id) {
-				// get video ID from URL to ensure clean and consistent URL format
-				// avoids duplicate saving of the same video with different URL formats
-				const url = new URL(window.location.href);
-				const videoID = url.searchParams.get('v');
+					if (!videoID) return; // ensure video exists
 
-				if (!videoID) return; // ensure video exists
+					// get URL and title
+					const videoURL = `https://www.youtube.com/watch?v=${videoID}`; // cleaned URL
+					const videoTitle = document.title;
 
-				// get URL and title
-				const videoURL = `https://www.youtube.com/watch?v=${videoID}`; // cleaned URL
-				const videoTitle = document.title;
-
-				// retrieve existing youtubeData from chrome.storage.local
-				chrome.storage.local.get('youtubeData', (data) => {
-					// set saved videos to youtubeData or empty object
-					let savedVideos = data.youtubeData || {};
+					// retrieve existing youtubeData from chrome.storage.local
+					const data = await chrome.storage.local.get('youtubeData');
+					const savedVideos = data.youtubeData ?? {};
 
 					// store the current video progress or replace it
 					savedVideos[videoURL] = {
@@ -56,11 +49,13 @@ function initContentScript() {
 					};
 
 					// save data to chrome storage
-					chrome.storage.local.set({ youtubeData: savedVideos });
-				});
-			} else {
-				// logs a warning if runtime.id does not exist
-				console.warn('Extension context invalidated, skipping save.');
+					await chrome.storage.local.set({ youtubeData: savedVideos });
+				} else {
+					// logs a warning if runtime.id does not exist
+					console.warn('Extension context invalidated, skipping save.');
+				}
+			} catch (error) {
+				console.error('Error saving video data:', error);
 			}
 		}
 
@@ -75,27 +70,6 @@ function initContentScript() {
 			interval = null;
 		}
 
-		// function removeVideoFromStorage() {
-		// 	const url = new URL(window.location.href);
-		// 	const videoID = url.searchParams.get('v');
-		// 	if (!videoID) return; // Ensure videoID exists
-
-		// 	const videoURL = `https://www.youtube.com/watch?v=${videoID}`; // Cleaned URL
-
-		// 	// Get existing saved videos
-		// 	chrome.storage.local.get('youtubeData', (data) => {
-		// 		let savedVideos = data.youtubeData || {};
-
-		// 		// Check if the video exists in storage
-		// 		if (savedVideos[videoURL]) {
-		// 			delete savedVideos[videoURL]; // Remove it
-		// 			chrome.storage.local.set({ youtubeData: savedVideos }, () => {
-		// 				console.log(`Removed finished video: ${videoURL}`);
-		// 			});
-		// 		}
-		// 	});
-		// }
-
 		document.addEventListener('visibilitychange', () => {
 			if (document.visibilityState === 'hidden') {
 				saveVideoData(); // Save progress before the tab is hidden
@@ -105,7 +79,6 @@ function initContentScript() {
 			}
 		});
 
-		// call saveVideoData every 2 seconds to regularly save progress
 		startSaving();
 	} else {
 		console.log('No video element found on this page.');
@@ -117,19 +90,15 @@ function initContentScript() {
 // helps detect when a video element appears, especially useful for Youtube's SPA behavior
 
 const observer = new MutationObserver((mutations, obs) => {
-	// check if current page is a youtube video page
 	if (window.location.pathname.startsWith('/watch')) {
-		// select video element
 		const video = document.querySelector('video');
 
 		if (video) {
 			console.log('Video element found by MutationObserver');
-			// calls initContentScript
 			initContentScript();
 			obs.disconnect(); // Stop observing once video is found
 		}
 	} else {
-		// non-video page
 		console.log('Not a video page, disconnecting observer.');
 		obs.disconnect(); // Disconnect for non-video pages
 	}
@@ -138,23 +107,16 @@ const observer = new MutationObserver((mutations, obs) => {
 // Tells the mutationObserver to watch for changes in the <body> element and all its child elements
 observer.observe(document.body, { childList: true, subtree: true });
 
-// Also handle URL changes in Youtube's SPA
-let lastUrl = location.href; // gets the current URL
+// MutationObserver to handle URL changes in Youtube's SPA
+let lastUrl = location.href;
 const urlObserver = new MutationObserver(() => {
-	// new observer to detect for URL changes
 	const currentUrl = location.href;
-	// compares current URL with last recorded URL
 	if (currentUrl !== lastUrl) {
-		// if URL changed, upadate lastUrl
 		lastUrl = currentUrl;
 		console.log('URL changed, reinitializing content script...');
 		observer.disconnect(); // Clear old observer ^
 		isScriptInitialized = false;
 		if (window.location.pathname.startsWith('/watch')) {
-			// directly reinitialize content script
-			// initContentScript();
-			console.log('This is a video after reinitializing content script');
-
 			// restart observer to catch any late-loaded video elements
 			observer.observe(document.body, { childList: true, subtree: true });
 		}
