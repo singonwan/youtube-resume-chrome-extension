@@ -1,5 +1,8 @@
 let isScriptInitialized = false;
+console.log('content.js loaded');
+
 function initContentScript() {
+	console.log('Initializing content script...');
 	if (isScriptInitialized) {
 		console.log('Content script already initialized. Skipping...');
 		return;
@@ -20,6 +23,12 @@ function initContentScript() {
 		console.log('video:', video);
 		console.log('currenttime:', video.currentTime);
 
+		// Listen for when the video ends
+		// video.addEventListener('ended', () => {
+		// 	console.log('Video ended, removing from storage...');
+		// 	removeVideoFromStorage();
+		// });
+
 		function saveVideoData() {
 			// ensures chrome extension is still running, if chrome.runtime.id is missing,
 			// it means the extension was disabled or removed
@@ -28,7 +37,9 @@ function initContentScript() {
 				// avoids duplicate saving of the same video with different URL formats
 				const url = new URL(window.location.href);
 				const videoID = url.searchParams.get('v');
+
 				if (!videoID) return; // ensure video exists
+
 				// get URL and title
 				const videoURL = `https://www.youtube.com/watch?v=${videoID}`; // cleaned URL
 				const videoTitle = document.title;
@@ -54,16 +65,36 @@ function initContentScript() {
 		}
 
 		function startSaving() {
-			if (!interval) {
-				console.log('Starting save interval...');
-				interval = setInterval(saveVideoData, 2000);
-			}
+			if (interval) clearInterval(interval); //prevent duplicate intervals
+			console.log('Starting save interval...');
+			interval = setInterval(saveVideoData, 2000);
 		}
 
 		function stopSaving() {
 			clearInterval(interval);
 			interval = null;
 		}
+
+		// function removeVideoFromStorage() {
+		// 	const url = new URL(window.location.href);
+		// 	const videoID = url.searchParams.get('v');
+		// 	if (!videoID) return; // Ensure videoID exists
+
+		// 	const videoURL = `https://www.youtube.com/watch?v=${videoID}`; // Cleaned URL
+
+		// 	// Get existing saved videos
+		// 	chrome.storage.local.get('youtubeData', (data) => {
+		// 		let savedVideos = data.youtubeData || {};
+
+		// 		// Check if the video exists in storage
+		// 		if (savedVideos[videoURL]) {
+		// 			delete savedVideos[videoURL]; // Remove it
+		// 			chrome.storage.local.set({ youtubeData: savedVideos }, () => {
+		// 				console.log(`Removed finished video: ${videoURL}`);
+		// 			});
+		// 		}
+		// 	});
+		// }
 
 		document.addEventListener('visibilitychange', () => {
 			if (document.visibilityState === 'hidden') {
@@ -121,7 +152,8 @@ const urlObserver = new MutationObserver(() => {
 		isScriptInitialized = false;
 		if (window.location.pathname.startsWith('/watch')) {
 			// directly reinitialize content script
-			initContentScript();
+			// initContentScript();
+			console.log('This is a video after reinitializing content script');
 
 			// restart observer to catch any late-loaded video elements
 			observer.observe(document.body, { childList: true, subtree: true });
