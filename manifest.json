@@ -5,9 +5,6 @@
 	"description": "Saves and restores YouTube video time when tab is closed.",
 	"permissions": ["storage", "tabs", "scripting"],
 	"host_permissions": ["https://www.youtube.com/*"],
-	"background": {
-		"service_worker": "background.js"
-	},
 	"icons": {
 		"16": "images/icon-16.png",
 		"32": "images/icon-32.png",
