@@ -3,7 +3,7 @@
 	"name": "YouTube Resume Time",
 	"version": "1.0.0",
 	"description": "Saves and restores YouTube video time when tab is closed.",
-	"permissions": ["storage", "tabs", "scripting"],
+	"permissions": ["storage"],
 	"host_permissions": ["https://www.youtube.com/*"],
 	"icons": {
 		"16": "images/icon-16.png",
