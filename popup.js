@@ -15,12 +15,37 @@ async function loadSavedVideos() {
 
 				const videoElement = document.createElement('div');
 				videoElement.classList.add('video-item');
-				videoElement.innerHTML = `
-            <p class="video-time">${minutes}m ${seconds}s</p>
-            <a href="${url}" target="_blank">${videoData.title}</a>
-            <button class="remove-btn" data-url="${url}">Remove Video</button>
-            <hr>
-          `;
+
+				// 		videoElement.innerHTML = `
+				//     <p class="video-time">${minutes}m ${seconds}s</p>
+				//     <a href="${url}" target="_blank">${videoData.title}</a>
+				//     <button class="remove-btn" data-url="${url}">Remove Video</button>
+				//     <hr>
+				//   `;
+
+				const timeElement = document.createElement('p');
+				timeElement.classList.add('video-time');
+				timeElement.innerText = `${minutes}m ${seconds}s`;
+
+				const linkElement = document.createElement('a');
+				linkElement.href = url;
+				linkElement.target = '_blank';
+				linkElement.innerText = videoData.title;
+
+				const removeButton = document.createElement('button');
+				removeButton.classList.add('remove-btn');
+				removeButton.dataset.url = url;
+				removeButton.innerText = 'Remove Video';
+
+				const hrElement = document.createElement('hr');
+
+				videoElement.appendChild(timeElement);
+				videoElement.appendChild(linkElement);
+				videoElement.appendChild(removeButton);
+				videoElement.appendChild(hrElement);
+
+				// container.appendChild(videoElement);
+
 				container.appendChild(videoElement);
 			}
 
@@ -32,7 +57,11 @@ async function loadSavedVideos() {
 				});
 			});
 		} else {
-			container.innerHTML = '<p>No saved videos.</p>';
+			// container.innerHTML = '<p>No saved videos.</p>';
+			container.innerHTML = ''; // Clear any existing videos
+			const noVideosMessage = document.createElement('p');
+			noVideosMessage.innerText = 'No saved videos.';
+			container.appendChild(noVideosMessage);
 			clearAllButton.style.display = 'none'; // hide button if no videos are found.
 		}
 	} catch (error) {
