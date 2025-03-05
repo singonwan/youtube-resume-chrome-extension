@@ -7,7 +7,7 @@ async function loadSavedVideos() {
 		const savedVideos = data.youtubeData;
 		if (savedVideos && Object.keys(savedVideos).length > 0) {
 			container.innerHTML = '';
-			clearAllButton.style.display = 'block'; // show button
+			clearAllButton.classList.remove('hidden');
 
 			for (const [url, videoData] of Object.entries(savedVideos)) {
 				const minutes = Math.floor(videoData.time / 60);
@@ -62,7 +62,7 @@ async function loadSavedVideos() {
 			const noVideosMessage = document.createElement('p');
 			noVideosMessage.innerText = 'No saved videos.';
 			container.appendChild(noVideosMessage);
-			clearAllButton.style.display = 'none'; // hide button if no videos are found.
+			clearAllButton.classList.add('hidden'); // hide button if no videos are found.
 		}
 	} catch (error) {
 		console.error('Error loading saved videos:', error);
@@ -91,7 +91,6 @@ async function clearAllVideos() {
 		console.error('Error clearing all videos:', error);
 	}
 }
-
-clearAllButton.style.display = 'none'; // initially hide the button
+clearAllButton.classList.add('hidden'); // initially hide the button
 loadSavedVideos();
 clearAllButton.addEventListener('click', clearAllVideos);
