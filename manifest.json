@@ -1,8 +1,8 @@
 {
 	"manifest_version": 3,
-	"name": "YouTube Resume Time",
+	"name": "YouTube Resume",
 	"version": "1.0.0",
-	"description": "Saves and restores YouTube video time when tab is closed.",
+	"description": "YouTube Resume automatically saves your YouTube video's last-watched timestamp, along with the video’s URL and title.",
 	"content_security_policy": {
 		"extension_pages": "default-src 'self'"
 	},
