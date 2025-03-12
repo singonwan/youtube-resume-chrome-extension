@@ -16,13 +16,6 @@ async function loadSavedVideos() {
 				const videoElement = document.createElement('div');
 				videoElement.classList.add('video-item');
 
-				// 		videoElement.innerHTML = `
-				//     <p class="video-time">${minutes}m ${seconds}s</p>
-				//     <a href="${url}" target="_blank">${videoData.title}</a>
-				//     <button class="remove-btn" data-url="${url}">Remove Video</button>
-				//     <hr>
-				//   `;
-
 				const timeElement = document.createElement('p');
 				timeElement.classList.add('video-time');
 				timeElement.innerText = `${minutes}m ${seconds}s`;
@@ -37,14 +30,9 @@ async function loadSavedVideos() {
 				removeButton.dataset.url = url;
 				removeButton.innerText = 'Remove Video';
 
-				const hrElement = document.createElement('hr');
-
 				videoElement.appendChild(timeElement);
 				videoElement.appendChild(linkElement);
 				videoElement.appendChild(removeButton);
-				videoElement.appendChild(hrElement);
-
-				// container.appendChild(videoElement);
 
 				container.appendChild(videoElement);
 			}
@@ -57,7 +45,6 @@ async function loadSavedVideos() {
 				});
 			});
 		} else {
-			// container.innerHTML = '<p>No saved videos.</p>';
 			container.innerHTML = ''; // Clear any existing videos
 			const noVideosMessage = document.createElement('h3');
 			noVideosMessage.innerText = 'No saved videos.';
@@ -74,10 +61,10 @@ async function removeVideo(videoURL) {
 		const data = await chrome.storage.local.get('youtubeData');
 		let savedVideos = data.youtubeData ?? {};
 		if (videoURL in savedVideos) {
-			delete savedVideos[videoURL]; // Remove the selected video
+			delete savedVideos[videoURL];
 			await chrome.storage.local.set({ youtubeData: savedVideos });
 		}
-		loadSavedVideos(); // Refresh UI
+		loadSavedVideos();
 	} catch (error) {
 		console.error('Error removing video:', error);
 	}
@@ -86,7 +73,7 @@ async function removeVideo(videoURL) {
 async function clearAllVideos() {
 	try {
 		await chrome.storage.local.remove('youtubeData');
-		loadSavedVideos(); // Refresh UI
+		loadSavedVideos();
 	} catch (error) {
 		console.error('Error clearing all videos:', error);
 	}
