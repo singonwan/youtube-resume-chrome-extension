@@ -2,7 +2,6 @@
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
-		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>YouTube Resume</title>
 		<link rel="stylesheet" href="./popup.css" />
@@ -10,8 +9,10 @@
 	<body>
 		<h2 id="title">YouTube Resume</h2>
 		<h3 id="saved-time">List of Videos</h3>
-		<div id="video-list"></div>
-		<button id="clear-all" class="hidden">Clear All</button>
+		<section id="video-list"></section>
+		<button id="clear-all" class="hidden" aria-label="Clear all saved videos">
+			Clear All
+		</button>
 
 		<script src="popup.js" type="module"></script>
 	</body>

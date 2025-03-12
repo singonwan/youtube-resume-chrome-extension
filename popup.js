@@ -59,7 +59,7 @@ async function loadSavedVideos() {
 		} else {
 			// container.innerHTML = '<p>No saved videos.</p>';
 			container.innerHTML = ''; // Clear any existing videos
-			const noVideosMessage = document.createElement('p');
+			const noVideosMessage = document.createElement('h3');
 			noVideosMessage.innerText = 'No saved videos.';
 			container.appendChild(noVideosMessage);
 			clearAllButton.classList.add('hidden'); // hide button if no videos are found.
