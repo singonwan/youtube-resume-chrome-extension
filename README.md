@@ -17,6 +17,12 @@ The extension is very easy to use. Once installed, when you visit a video page o
 
 If you don't want the last-watched time-stamp of a video anymore, you simply click on the popup and click the 'Remove Video' button to remove that video or the 'Clear All' button to remove all the videos saved.
 
-When no videos are saved
+## Screenshots
+
+#### When no videos are saved
+
 ![no videos saved](/screenshots/resized-screenshot2.png)
 
+#### When videos are saved
+
+![videos saved](/screenshots/resized-screenshot1.png)
